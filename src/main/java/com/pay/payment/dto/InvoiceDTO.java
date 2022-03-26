@@ -5,14 +5,14 @@ import javax.validation.constraints.NotNull;
 public class InvoiceDTO {
 
     @NotNull(message = "Invoice is required")
-    private long invoice;
+    private String invoice;
 
     
-    public long getInvoice() {
+    public String getInvoice() {
         return invoice;
     }
 
-    public void setInvoice(long invoice) {
+    public void setInvoice(String invoice) {
         this.invoice = invoice;
     }
        

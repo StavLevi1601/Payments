@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NegativeOrZero;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -11,16 +12,17 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
+
 @DynamoDBTable(tableName = "Payments")
 public class CreatePaymentDTO {
 
     @NotBlank(message = "Currency is required")
      private String currency;
 
-    @NotNull(message = "Invoice is required")
+    @NotNull(message = "invoice is required")
     // Partition key
     @DynamoDBHashKey(attributeName = "invoice")
-    private long invoice;
+    private String invoice;
 
      @Min(1)
      private BigDecimal amount;
@@ -39,10 +41,10 @@ public class CreatePaymentDTO {
         this.currency = currency;
     }
 
-    public long getInvoice() {
+    public String getInvoice() {
         return invoice;
     }
-    public void setInvoice(long invoice) {
+    public void setInvoice(String invoice) {
         this.invoice = invoice;
     }
 
