@@ -1,5 +1,7 @@
 package com.pay.payment.controller;
 
+import java.text.ParseException;
+
 import javax.validation.Valid;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -29,10 +31,16 @@ public class PaymentController {
     
     @PostMapping
     @RequestMapping("/create")
-    public ResponseEntity<?> createPayment(@RequestBody @Valid CreatePaymentDTO reqBody, BindingResult result)
+    public ResponseEntity<?> createPayment(@RequestBody @Valid CreatePaymentDTO reqBody, BindingResult result) throws ParseException
     {
         ResponseEntity<?> errorMap = mapValidationErrorService.MapValidationCreatePayment(result);
+
         if (errorMap != null)
+        {
+            return errorMap;
+        }
+        errorMap = mapValidationErrorService.mapValidateExpiryDate(reqBody);
+        if  (errorMap!=null)
         {
             return errorMap;
         }

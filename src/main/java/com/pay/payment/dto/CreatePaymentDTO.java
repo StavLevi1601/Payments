@@ -3,9 +3,12 @@ package com.pay.payment.dto;
 import java.math.BigDecimal;
 
 import javax.validation.Valid;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NegativeOrZero;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
@@ -25,6 +28,7 @@ public class CreatePaymentDTO {
     private String invoice;
 
      @Min(1)
+     @NotNull
      private BigDecimal amount;
 
     @Valid

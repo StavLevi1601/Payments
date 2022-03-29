@@ -1,5 +1,11 @@
 package com.pay.payment.service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,6 +14,7 @@ import javax.validation.Valid;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.google.appengine.repackaged.org.joda.time.LocalTime;
 import com.pay.payment.dto.CreatePaymentDTO;
 import com.pay.payment.dto.CreatePaymentResponseDTO;
 import com.pay.payment.dto.InvoiceDTO;
@@ -97,5 +104,46 @@ public class MapValidationErrorService {
         return null;    
     }
 
+    public ResponseEntity<?> mapValidateExpiryDate(@Valid CreatePaymentDTO reqBody) throws ParseException 
+    {
+        CreatePaymentResponseDTO createPaymentResponseDTO = new CreatePaymentResponseDTO();
+        Map<String, String> errorMapping = new HashMap<>();
+        String expiry = reqBody.getCard().getExpiry();
+        String twoFirstNumber= expiry.substring(0, 2);
+        String twoLastNumber= expiry.substring(2, expiry.length());
+        LocalDateTime now = LocalDateTime.now();  
+        String stringDate = now.toString();
+        String dateYearString = stringDate.substring(2, 4);
+        String dateMonthString = stringDate.substring(5, 7);
+        String fullDate = dateMonthString+dateYearString;
+        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+        String twoLastNumberYear = String.valueOf(currentYear).substring(2, 4);
+        if ((Integer.parseInt(twoFirstNumber)<1) || (Integer.parseInt(twoFirstNumber)>12))
+        {
+            if (Integer.parseInt(twoLastNumber)<Integer.parseInt(twoLastNumberYear))
+            {
+                createPaymentResponseDTO.setApproved(false);
+                errorMapping.put("cardExpiry", "the expiry date is not valid");
+                PaymentErrorsDTO paymentErrorsDTO = new PaymentErrorsDTO();
+                paymentErrorsDTO.setCardExpiry(errorMapping.get("cardExpiry"));
+                createPaymentResponseDTO.setErrors(paymentErrorsDTO);
+                return new ResponseEntity<>(createPaymentResponseDTO, HttpStatus.BAD_REQUEST);
+            }          
+        }
+        Date dateExpiry=new SimpleDateFormat("MMyy").parse(twoFirstNumber+twoLastNumber);
+        Date LocalDate = new SimpleDateFormat("MMyy").parse(fullDate);
+        boolean isBefore = dateExpiry.before(LocalDate);
+        if (isBefore)
+        {
+            createPaymentResponseDTO.setApproved(false);
+            errorMapping.put("cardExpiry", "the expiry date cant be before the local date");
+            PaymentErrorsDTO paymentErrorsDTO = new PaymentErrorsDTO();
+            paymentErrorsDTO.setCardExpiry(errorMapping.get("cardExpiry"));
+            createPaymentResponseDTO.setErrors(paymentErrorsDTO);
+            return new ResponseEntity<>(createPaymentResponseDTO, HttpStatus.BAD_REQUEST);
+
+        }
+        return null;  
+    }
     
 }
